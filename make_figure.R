@@ -23,10 +23,10 @@ for_b_plot = rbind(b_results[gene %in% genes_of_interest_B],
 
 for_b_plot = for_b_plot[order(-selection_intensity)] # sort ourselves to ensure that styling matches
 
-# Bold the previously reported genes. Note that ggplot doesn't like this way of styling labels
+# Bold the previously unreported genes. Note that ggplot doesn't like this way of styling labels
 # and gives warnings, but as of ggplot v3.4.3, it does work.
-for_b_plot[, to_style := 'plain']
-for_b_plot[gene %in% genes_of_interest_B, to_style := 'bold']
+for_b_plot[, to_style := 'bold']
+for_b_plot[gene %in% genes_of_interest_B, to_style := 'plain']
 
 # Repeat same process with T-cell group
 t_results = cesa$selection$comp_t
@@ -38,24 +38,28 @@ for_t_plot = rbind(t_results[gene %in% genes_of_interest_T],
                    t_results[order(-selection_intensity)][! gene %in% genes_of_interest_T][1:num_T_new])
 
 for_t_plot = for_t_plot[order(-selection_intensity)] # sort ourselves to ensure that styling matches
-for_t_plot[, to_style := 'plain']
-for_t_plot[gene %in% genes_of_interest_T, to_style := 'bold']
+for_t_plot[, to_style := 'bold']
+for_t_plot[gene %in% genes_of_interest_T, to_style := 'plain']
 
 b_plot = plot_effects(for_b_plot, prevalence_method = 'both', y_label = 'gene', y_title = 'Gene',
-                      topn = NULL, order_by_effect = FALSE, x_title = 'Cancer effect, B-ALL',
+                      topn = NULL, order_by_effect = FALSE, x_title = 'B-ALL cancer effect',
                       legend_size_name = 'Samples with mutated gene\n(Percent of B-ALL cohort)',
                       color_by = 'darkseagreen3', legend.position = c(.75, .20)) + 
   theme(axis.text.y = element_text(face = rev(for_b_plot$to_style)))
 
 t_plot = plot_effects(for_t_plot, prevalence_method = 'both', y_label = 'gene', y_title = 'Gene',
-                      topn = NULL, order_by_effect = FALSE, x_title = 'Cancer effect, T-ALL',
+                      topn = NULL, order_by_effect = FALSE, x_title = 'T-ALL cancer effect',
                       color_by = 'khaki', legend_size_name = 'Samples with mutated gene\n(Percent of T-ALL cohort)',
                       legend.position = c(.75, .20)) +
   theme(axis.text.y = element_text(face = rev(for_t_plot$to_style)))
 
 
-combined = cowplot::plot_grid(t_plot, b_plot, labels = 'AUTO', label_x = .03, label_y = .915, hjust = 0, vjust = 0)
-ggsave(plot = combined, filename = 'ALL_effects_plot.png', width = 1325*2.5, height = 750*2.5, 
-       units = 'px', dpi = 'retina')
+## Previous submission used a combined plot:
+# combined = cowplot::plot_grid(t_plot, b_plot, labels = 'AUTO', label_x = .03, label_y = .915, hjust = 0, vjust = 0)
+# ggsave(plot = combined, filename = 'ALL_effects_plot.png', width = 1325*2.5, height = 750*2.5, 
+#        units = 'px', dpi = 'retina')
 
+# Save separate plots
+ggsave(plot = b_plot, filename = 'ALL_effects_B-cell.png', width = 550 * 2.5, height = 800*2.5, units = 'px', dpi = 'retina')
+ggsave(plot = t_plot, filename = 'ALL_effects_T-cell.png', width = 550 * 2.5, height = 800*2.5, units = 'px', dpi = 'retina')
 
